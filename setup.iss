@@ -1,4 +1,5 @@
-Comment: "Shopswell Desktop App Setup Script for Inno"
+; Comment: "Shopswell Desktop App Setup Script for Inno" 
+; John H - Oct 26 2015
 
 #define MyAppName "Shopswell App"
 #define MyAppVersion "1.0.0"
