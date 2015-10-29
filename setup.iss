@@ -55,3 +55,6 @@ Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}
 [Run]
 ; After installing, run the app
 Filename: "{app}\nw.exe"; WorkingDir: "{app}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
+
+[UninstallDelete]
+Type: dirifempty; Name: "{pf}\{#MyAppName}"
