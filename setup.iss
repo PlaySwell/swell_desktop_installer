@@ -8,7 +8,8 @@
 ; 3. Testing with Windows 10
 ; 4. Testing scenarios where restart might be required
 ; 5. Uninstall when the app is running needs to stop the running app first
-; 6. Try to "exclude" .gitignore from install 
+; 6. Try to "exclude" .gitignore from install
+; 7. Delve into the 32 v2 64 bit issues related to where HKLM keys are being stored is "Wow6432Node" OK?
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Building an installer
 ;----------------------
