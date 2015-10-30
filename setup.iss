@@ -2,6 +2,7 @@
 ; John H - Oct 26 2015
 ;
 ; TODO: 
+; 0. Verify the naming of things (from the .exe to the App name, to the the folder names etc.) with the Playswell folks
 ; 1. Work on a more silent install ... can we get rid of the initial "Do you want this program to mke changes" prompt?
 ;    (/SP flag is supposed to do this but appear not to)
 ; 2. Testing non-admin user accounts
