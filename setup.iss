@@ -1,9 +1,60 @@
-; Comment: "Shopswell Desktop App Setup Script for Inno" 
+; Shopswell Desktop App Setup Script for Inno                                                                                              
 ; John H - Oct 26 2015
 ;
-; TODO - Parameterize this script
-;
+; TODO: 
+; 1. Work on a more silent install ... can we get rid of the initial "Do you want this program to mke changes" prompt?
+;    (/SP flag is supposed to do this but appear not to)
+; 2. Testing non-admin user accounts
+; 3. Testing with Windows 10
+; 4. Testing scenarios where restart might be required
+; 5. Uninstall when the app is running needs to stop the running app first
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+; Building an installer
+;----------------------
+; Prerequisites
+; 1. Installed Inno version 5 (from http://www.jrsoftware.org/download.php/is.exe?site=1)
+; 2. Installed node.js (from https://nodejs.org/dist/v4.2.1/win-x64/node.exe)
+; 3. Installed nw.js (via 'npm install nw' after node.js was installed)
+; 4. Installed packages in .\node_modules (via 'npm install' for: node-notifier, node-schedule, path, request, wake-event)
+; 5. Checked out Github project: https://github.com/PlaySwell/swell_desktop
+; 
+; Generic script use 
+; From the command line: iscc NwjsSource ModuleSource SwellSource 
+; ...
+; Where 
+; - NwjsSource is the path to the directory (.\nwjs) which contains the nw.exe from node-webkit (aka nw)
+; - ModuleSource is the path to the directory (.\node_modules) which contains installed packages from 4. above
+; - SwellSource is the path to the directory which contains the checked out .\swell_desktop repository
+; 
+; Actual Script Use with /d parameters
+; <path to iscc.exe>\iscc "/dNwjsSource=<path to nw.exe>" "/dModuleSource=<path to .\node_modules>" "/dSwellSource=<path to local swell_desktop repo>" setup.iss
+; 
+; Example useage with actual paths:
+; "C:\Program Files (x86)\Inno Setup 5\iscc" "/dNwjsSource=c:\nwjs" "/dModuleSource=c:\nwjs\node_modules" "/dSwellSource=c:\swell_desktop" setup.iss
+; 
+; Note: Parameters passed via the "/dname=value" on command line are accessible via "{#name}" in the script body
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+; Running the installer
+;----------------------
+; In normal verbose mode:   shopswell-setup-1.0.0.exe
+; In silent mode:      shopswell-setup-1.0.0.exe /SP /VERYSILENT      
 
+
+
+; Default parameters, if not supplied on the command line
+#ifndef NwjsSource
+#define NwjsSource "c:\nwjs"
+#endif
+
+#ifndef ModuleSource
+#define ModuleSource "c:\nwjs\node_modules"
+#endif
+
+#ifndef SwellSource
+#define SwellSource "c:\swell_desktop"
+#endif
+
+; Other per-app constants
 #define MyAppName "Shopswell App"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Shopswell"
@@ -31,17 +82,19 @@ ShowLanguageDialog=auto
 PrivilegesRequired=admin
 
 [Files]
-; TODO - rework this to pull explicit source files from different directories
-Source: "c:/nwjs/*"; Excludes: "mac_files,pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll,.gitignore,README.md"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+; Source: "c:/nwjs/*"; Excludes: "mac_files,pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll,.gitignore,README.md"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "{#ModuleSource}/*"; DestDir: "{app}\node_modules"; Flags: ignoreversion recursesubdirs 
+Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,*.gitignore,gitignore,README.md";DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Registry]
 ; Add the 'run on startup' registry key
-Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\nw.exe"""; Flags: uninsdeletevalue; 
-
 ; Add HKEY_LOCAL_MACHINE unique-to-shopswell key - delete on uninstall if empty
-Root: HKLM; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
-Root: HKLM; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
-Root: HKLM; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; ValueType: string; ValueName: "UniqueShopswellKey"; ValueData: "{#MyAppId}"; Flags: uninsdeletevalue;
+Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\nw.exe"""; Flags: uninsdeletevalue; 
+Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
+Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
+Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; Flags: uninsdeletekeyifempty
+Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; ValueType: string; ValueName: "UniqueShopswellKey"; ValueData: "{#MyAppId}"; Flags: uninsdeletevalue;
 
 [Tasks]
 Name: "desktopicon"; Description: "{#CreateDesktopIcon}"; GroupDescription: "{#DesktopIcon}"
