@@ -9,9 +9,14 @@
 ; 3. Testing with Windows 10
 ; 4. Testing scenarios where restart might be required
 ; 5. Uninstall when the app is running needs to stop the running app first
-; 6. Try to "exclude" .gitignore from install
+; 6. DONE Try to "exclude" .gitignore & README.md from install 
 ; 7. Delve into the 32 v2 64 bit issues related to where HKLM keys are being stored is "Wow6432Node" OK?
-;-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+; 8. Test on 32 bit OS (related to #7 - the issue is the Hardcandy requirement to have an identifiable key which can be tested after install/uninstall:
+; "Please provide a registry key (or other critical, unique file) that will exist after your product is installed and will not exist after your product is uninstalled"
+; This is currently set as: HKLM\Software\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId
+; But on 64 bit machines, this is actually set into:
+; HKLM\Software\Wow6432Node\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId 
+;----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Building an installer
 ;----------------------
 ; Prerequisites
@@ -84,7 +89,7 @@ ShowLanguageDialog=auto
 PrivilegesRequired=admin
 DisableStartupPrompt=yes
 DefaultDirName={pf}\{#MyAppName}
-DefaultGroupName={#MyAppName} 
+DefaultGroupName={#MyAppPublisher} 
 UninstallDisplayIcon="{app}\icons\logo.ico"
 SetupIconFile="{#SwellSource}\icons\logo.ico"
 
@@ -107,7 +112,7 @@ Name: "desktopicon"; Description: "{#CreateDesktopIcon}"; GroupDescription: "{#D
 
 [Icons]
 ; Add program group, startup menu choices and desktop icon
-Name: "{group}\{#MyAppPublisher}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
 Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
 Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"; Tasks: desktopicon
 
