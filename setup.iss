@@ -75,8 +75,6 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={userappdata}\{#MyAppName}
-DefaultGroupName={#MyAppName}
 UninstallDisplayName={#MyAppName}
 Compression=zip
 SolidCompression=yes
@@ -85,18 +83,20 @@ OutputBaseFilename=shopswell
 ShowLanguageDialog=auto
 PrivilegesRequired=admin
 DisableStartupPrompt=yes
-UninstallDisplayIcon="{userappdata}\icons\logo.ico"
-
+DefaultDirName={pf}\{#MyAppName}
+DefaultGroupName={#MyAppName} 
+UninstallDisplayIcon="{app}\icons\logo.ico"
+SetupIconFile="{app}\icons\logo.ico"
 
 [Files]
-Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{userappdata}"; Flags: ignoreversion 
-Source: "{#ModuleSource}/*"; DestDir: "{userappdata}\node_modules"; Flags: ignoreversion recursesubdirs 
-Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,*.gitignore,gitignore,README.md";DestDir: "{userappdata}"; Flags: ignoreversion recursesubdirs
+Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion 
+Source: "{#ModuleSource}/*"; DestDir: "{app}\node_modules"; Flags: ignoreversion recursesubdirs 
+Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,README.md,*.gitignore";DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Registry]
 ; Add the 'run on startup' registry key
 ; Add HKEY_LOCAL_MACHINE unique-to-shopswell key - delete on uninstall if empty
-Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{userappdata}\nw.exe"""; Flags: uninsdeletevalue; 
+Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\nw.exe"""; Flags: uninsdeletevalue; 
 Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
 Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
 Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; Flags: uninsdeletekeyifempty
@@ -107,13 +107,13 @@ Name: "desktopicon"; Description: "{#CreateDesktopIcon}"; GroupDescription: "{#D
 
 [Icons]
 ; Add program group, startup menu choices and desktop icon
-Name: "{group}\{#MyAppPublisher}"; Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; IconFilename: "{userappdata}\icons\logo.ico"
-Name: "{userstartup}\{#MyAppName}"; Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; IconFilename: "{userappdata}\icons\logo.ico"
-Name: "{userdesktop}\{#MyAppName}"; Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; IconFilename: "{userappdata}\icons\logo.ico"; Tasks: desktopicon
+Name: "{group}\{#MyAppPublisher}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
+Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"; Tasks: desktopicon
 
 [Run]
 ; After installing, run the app
-Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
+Filename: "{app}\nw.exe"; WorkingDir: "{app}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
 
 [UninstallDelete]
-Type: dirifempty; Name: "{userappdata}\{#MyAppName}"
+Type: dirifempty; Name: "{app}\{#MyAppName}"
