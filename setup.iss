@@ -2,7 +2,7 @@
 ; John H - Oct 26 2015
 ;
 ; TODO: 
-; 0. Verify the naming of things (from the .exe to the App name, to the the folder names etc.) with the Playswell folks
+; 0. DONE - Verify the naming of things (from the .exe to the App name, to the the folder names etc.) with the Playswell folks
 ; 1. Work on a more silent install ... can we get rid of the initial "Do you want this program to mke changes" prompt?
 ;    (/SP flag is supposed to do this but appear not to)
 ; 2. Testing non-admin user accounts
@@ -39,8 +39,8 @@
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Running the installer
 ;----------------------
-; In normal verbose mode:   shopswell-setup-1.0.0.exe
-; In silent mode:      shopswell-setup-1.0.0.exe /SP /VERYSILENT      
+; In normal verbose mode:   shopswell.exe
+; In silent mode:           shopswell.exe /SP /VERYSILENT /NORESTART /SUPPRESSMSGBOXES    
 
 
 
@@ -75,25 +75,28 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\{#MyAppName}
+DefaultDirName={userappdata}\{#MyAppName}
 DefaultGroupName={#MyAppName}
+UninstallDisplayName={#MyAppName}
 Compression=zip
 SolidCompression=yes
 OutputDir=.
-OutputBaseFilename=shopswell-setup-{#MyAppVersion}
+OutputBaseFilename=shopswell
 ShowLanguageDialog=auto
 PrivilegesRequired=admin
+DisableStartupPrompt=yes
+UninstallDisplayIcon="{userappdata}\icons\logo.ico"
+
 
 [Files]
-; Source: "c:/nwjs/*"; Excludes: "mac_files,pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll,.gitignore,README.md"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
-Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion 
-Source: "{#ModuleSource}/*"; DestDir: "{app}\node_modules"; Flags: ignoreversion recursesubdirs 
-Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,*.gitignore,gitignore,README.md";DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{userappdata}"; Flags: ignoreversion 
+Source: "{#ModuleSource}/*"; DestDir: "{userappdata}\node_modules"; Flags: ignoreversion recursesubdirs 
+Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,*.gitignore,gitignore,README.md";DestDir: "{userappdata}"; Flags: ignoreversion recursesubdirs
 
 [Registry]
 ; Add the 'run on startup' registry key
 ; Add HKEY_LOCAL_MACHINE unique-to-shopswell key - delete on uninstall if empty
-Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\nw.exe"""; Flags: uninsdeletevalue; 
+Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{userappdata}\nw.exe"""; Flags: uninsdeletevalue; 
 Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
 Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
 Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; Flags: uninsdeletekeyifempty
@@ -104,13 +107,13 @@ Name: "desktopicon"; Description: "{#CreateDesktopIcon}"; GroupDescription: "{#D
 
 [Icons]
 ; Add program group, startup menu choices and desktop icon
-Name: "{group}\{#MyAppPublisher}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
-Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
-Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"; Tasks: desktopicon
+Name: "{group}\{#MyAppPublisher}"; Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; IconFilename: "{userappdata}\icons\logo.ico"
+Name: "{userstartup}\{#MyAppName}"; Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; IconFilename: "{userappdata}\icons\logo.ico"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; IconFilename: "{userappdata}\icons\logo.ico"; Tasks: desktopicon
 
 [Run]
 ; After installing, run the app
-Filename: "{app}\nw.exe"; WorkingDir: "{app}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
+Filename: "{userappdata}\nw.exe"; WorkingDir: "{userappdata}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
 
 [UninstallDelete]
-Type: dirifempty; Name: "{pf}\{#MyAppName}"
+Type: dirifempty; Name: "{userappdata}\{#MyAppName}"
