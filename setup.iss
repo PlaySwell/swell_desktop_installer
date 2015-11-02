@@ -86,12 +86,12 @@ DisableStartupPrompt=yes
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName} 
 UninstallDisplayIcon="{app}\icons\logo.ico"
-SetupIconFile="{app}\icons\logo.ico"
+SetupIconFile="{#SwellSource}\icons\logo.ico"
 
 [Files]
 Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion 
 Source: "{#ModuleSource}/*"; DestDir: "{app}\node_modules"; Flags: ignoreversion recursesubdirs 
-Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,README.md,*.gitignore";DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#SwellSource}/*"; Excludes: "mac_files,README.md,.gitignore"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Registry]
 ; Add the 'run on startup' registry key
