@@ -6,10 +6,11 @@
 ; 1. Work on a more silent install ... can we get rid of the initial "Do you want this program to mke changes" prompt?
 ;    (/SP flag is supposed to do this but appear not to)
 ; 2. Testing non-admin user accounts
-; 3. Testing with Windows 10
+; 3. DONE - Testing with Windows 10 - install works fine
+;    TODO - Uninstall may leave residue in registry - to be tracked down
 ; 4. Testing scenarios where restart might be required
 ; 5. Uninstall when the app is running needs to stop the running app first
-; 6. DONE Try to "exclude" .gitignore & README.md from install 
+; 6. DONE - Try to "exclude" .gitignore & README.md from install 
 ; 7. Delve into the 32 v2 64 bit issues related to where HKLM keys are being stored is "Wow6432Node" OK?
 ; 8. Test on 32 bit OS (related to #7 - the issue is the Hardcandy requirement to have an identifiable key which can be tested after install/uninstall:
 ; "Please provide a registry key (or other critical, unique file) that will exist after your product is installed and will not exist after your product is uninstalled"
