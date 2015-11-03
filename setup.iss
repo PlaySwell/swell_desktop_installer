@@ -3,18 +3,31 @@
 ;
 ; TODO: 
 ; 0. DONE - Verify the naming of things (from the .exe to the App name, to the the folder names etc.) with the Playswell folks
+;
 ; 1. Work on a more silent install ... can we get rid of the initial "Do you want this program to mke changes" prompt?
 ;    (/SP flag is supposed to do this but appear not to)
-; 2. Testing non-admin user accounts
+;    FIXED below by lowering privelege level to 'lowest'
+;    TODO: Awaiting input from Shopswell re per-user install in Appdata vs. Program Files, HKCU vs. HKLU
+;
+; 2. DONE - Testing non-admin user accounts
+;    Note: Non admin accounts will request a password when an install is attempted unless admin priveleges / per user install as per #1 above  
+;    There are some ways around this but wil result in a per-user install
+;    TODO: get guidance from Shopswell folks (same as #1)
+;
 ; 3. DONE - Testing with Windows 10 - install works fine
 ;    TODO - Uninstall may leave residue in registry - to be tracked down
+;
 ; 4. Testing scenarios where restart might be required
+;    UDPDATE - so far, in testing various accounts (admin, user, guest) this has not happened 
+;
 ; 5. Uninstall when the app is running needs to stop the running app first
+;
 ; 6. DONE - Try to "exclude" .gitignore & README.md from install 
+;
 ; 7. Delve into the 32 v2 64 bit issues related to where HKLM keys are being stored is "Wow6432Node" OK?
-; 8. Test on 32 bit OS (related to #7 - the issue is the Hardcandy requirement to have an identifiable key which can be tested after install/uninstall:
+; 8. Test on 32 bit OS (related to #7) - the issue is the Hardcandy requirement to have an identifiable key which can be tested after install/uninstall:
 ; "Please provide a registry key (or other critical, unique file) that will exist after your product is installed and will not exist after your product is uninstalled"
-; This is currently set as: HKLM\Software\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId
+; This is currently set as: HKCU\Software\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId
 ; But on 64 bit machines, this is actually set into:
 ; HKLM\Software\Wow6432Node\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId 
 ;----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,39 +100,39 @@ SolidCompression=yes
 OutputDir=.
 OutputBaseFilename=shopswell
 ShowLanguageDialog=auto
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 DisableStartupPrompt=yes
-DefaultDirName={pf}\{#MyAppName}
+DefaultDirName={userappdata}\{#MyAppName}
 DefaultGroupName={#MyAppPublisher} 
-UninstallDisplayIcon="{app}\icons\logo.ico"
+UninstallDisplayIcon="{userappdata}\{#MyAppName}\icons\logo.ico"
 SetupIconFile="{#SwellSource}\icons\logo.ico"
 
 [Files]
-Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion 
-Source: "{#ModuleSource}/*"; DestDir: "{app}\node_modules"; Flags: ignoreversion recursesubdirs 
-Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,README.md,.gitignore"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{userappdata}\{#MyAppName}"; Flags: ignoreversion 
+Source: "{#ModuleSource}/*"; DestDir: "{userappdata}\{#MyAppName}\node_modules"; Flags: ignoreversion recursesubdirs 
+Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,README.md,.gitignore"; DestDir: "{userappdata}\{#MyAppName}"; Flags: ignoreversion recursesubdirs
 
 [Registry]
 ; Add the 'run on startup' registry key
 ; Add HKEY_LOCAL_MACHINE unique-to-shopswell key - delete on uninstall if empty
-Root: "HKLM"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\nw.exe"""; Flags: uninsdeletevalue; 
-Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
-Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
-Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; Flags: uninsdeletekeyifempty
-Root: "HKLM"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; ValueType: string; ValueName: "UniqueShopswellKey"; ValueData: "{#MyAppId}"; Flags: uninsdeletevalue;
+Root: "HKCU"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{userappdata}\{#MyAppName}\nw.exe"""; Flags: uninsdeletevalue; 
+Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
+Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
+Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; Flags: uninsdeletekeyifempty
+Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; ValueType: string; ValueName: "UniqueShopswellKey"; ValueData: "{#MyAppId}"; Flags: uninsdeletevalue;
 
 [Tasks]
 Name: "desktopicon"; Description: "{#CreateDesktopIcon}"; GroupDescription: "{#DesktopIcon}"
 
 [Icons]
 ; Add program group, startup menu choices and desktop icon
-Name: "{group}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
-Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"
-Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\nw.exe"; WorkingDir: "{app}"; IconFilename: "{app}\icons\logo.ico"; Tasks: desktopicon
+Name: "{group}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"
+Name: "{userstartup}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"; Tasks: desktopicon
 
 [Run]
 ; After installing, run the app
-Filename: "{app}\nw.exe"; WorkingDir: "{app}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
+Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
 
 [UninstallDelete]
-Type: dirifempty; Name: "{app}\{#MyAppName}"
+Type: dirifempty; Name: "{userappdata}\{#MyAppName}"
