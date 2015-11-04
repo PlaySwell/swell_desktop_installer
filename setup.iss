@@ -44,7 +44,7 @@
 ; From the command line: iscc NwjsSource ModuleSource SwellSource 
 ; ...
 ; Where 
-; - NwjsSource is the path to the directory (.\nwjs) which contains the nw.exe from node-webkit (aka nw)
+; - NwjsSource is the path to the directory (.\nwjs) which contains the original nw.exe from node-webkit (aka nw)
 ; - ModuleSource is the path to the directory (.\node_modules) which contains installed packages from 4. above
 ; - SwellSource is the path to the directory which contains the checked out .\swell_desktop repository
 ; 
@@ -81,7 +81,8 @@
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Shopswell"
 #define MyAppURL "http://www.shopswell.com"
-#define MyAppId "ShopswellAppId"
+#define MyAppId "911176E3-243D-49D5-9CF0-34B1FB01CBE3"
+#define MyExeName "swell.exe"
 #define LaunchProgram "Start Shopswell App after Installation"
 #define DesktopIcon "Add Desktop Shortcut"
 #define CreateDesktopIcon "Do you want to create a desktop icon?"
@@ -108,31 +109,39 @@ UninstallDisplayIcon="{userappdata}\{#MyAppName}\icons\logo.ico"
 SetupIconFile="{#SwellSource}\icons\logo.ico"
 
 [Files]
+; Gather files from the node-webkit, node_modules and the swell_desktop checkout directories
 Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{userappdata}\{#MyAppName}"; Flags: ignoreversion 
+Source: "{#NwjsSource}/nw.exe"; DestDir: "{userappdata}\{#MyAppName}"; DestName: "{#MyExeName}"; Flags: ignoreversion 
 Source: "{#ModuleSource}/*"; DestDir: "{userappdata}\{#MyAppName}\node_modules"; Flags: ignoreversion recursesubdirs 
 Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,README.md,.gitignore"; DestDir: "{userappdata}\{#MyAppName}"; Flags: ignoreversion recursesubdirs
 
 [Registry]
+; This is a per-user install so use HKEY_CURRENT_USER (not HKEY_LOCAL_MACHINE) 
 ; Add the 'run on startup' registry key
-; Add HKEY_LOCAL_MACHINE unique-to-shopswell key - delete on uninstall if empty
-Root: "HKCU"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{userappdata}\{#MyAppName}\nw.exe"""; Flags: uninsdeletevalue; 
+Root: "HKCU"; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{userappdata}\{#MyAppName}\{#MyExeName}"""; Flags: uninsdeletevalue; 
+; Add unique-to-shopswell key tree - delete on uninstall 
 Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}"; Flags: uninsdeletekeyifempty
 Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}"; Flags: uninsdeletekeyifempty
 Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; Flags: uninsdeletekeyifempty
 Root: "HKCU"; Subkey: "Software\{#MyAppPublisher}\{#MyAppName}\Settings"; ValueType: string; ValueName: "UniqueShopswellKey"; ValueData: "{#MyAppId}"; Flags: uninsdeletevalue;
 
 [Tasks]
+; Ask user (in non-slient install) if they want to add icon to the desktop
 Name: "desktopicon"; Description: "{#CreateDesktopIcon}"; GroupDescription: "{#DesktopIcon}"
 
 [Icons]
 ; Add program group, startup menu choices and desktop icon
-Name: "{group}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"
-Name: "{userstartup}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"
-Name: "{userdesktop}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"; Tasks: desktopicon
+Name: "{group}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\{#MyExeName}"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"
+Name: "{userstartup}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\{#MyExeName}"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"
+Name: "{userdesktop}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppName}\{#MyExeName}"; WorkingDir: "{userappdata}\{#MyAppName}"; IconFilename: "{userappdata}\{#MyAppName}\icons\logo.ico"; Tasks: desktopicon
 
 [Run]
 ; After installing, run the app
-Filename: "{userappdata}\{#MyAppName}\nw.exe"; WorkingDir: "{userappdata}\{#MyAppName}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
+Filename: "{userappdata}\{#MyAppName}\{#MyExeName}"; WorkingDir: "{userappdata}\{#MyAppName}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
 
+[UninstallRun]
+; Before uninstalling, kill the running app (otherwise uninstall will not be clean)
+Filename: "{cmd}"; Parameters: "/C ""taskkill /im {#MyExeName} /f /t"
+   
 [UninstallDelete]
-Type: dirifempty; Name: "{userappdata}\{#MyAppName}"
+Type: filesandordirs; Name: "{userappdata}\{#MyAppName}"
