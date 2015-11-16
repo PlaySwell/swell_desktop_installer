@@ -20,18 +20,21 @@
 ;    TODO - Uninstall may leave residue in registry - to be tracked down
 ;    
 ; 4. Testing scenarios where restart might be required
-;    UPDATE - so far, in testing various accounts (admin, user, guest) this has not happened 
+;    DONE - so far, in testing various accounts (admin, user, guest) this has not happened 
 ;
 ; 5. Uninstall when the app is running needs to stop the running app first
+;    DONE - use 'killtask' on uninstall to kill the running instance of swell.exe
 ;
 ; 6. DONE - Try to "exclude" .gitignore & README.md from install 
 ;
 ; 7. Delve into the 32 v2 64 bit issues related to where HKLM keys are being stored is "Wow6432Node" OK?
 ; 8. Test on 32 bit OS (related to #7) - the issue is the Hardcandy requirement to have an identifiable key which can be tested after install/uninstall:
-; "Please provide a registry key (or other critical, unique file) that will exist after your product is installed and will not exist after your product is uninstalled"
-; This is currently set as: HKLM\Software\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId
-; But on 64 bit machines, this is actually set into:
-; HKLM\Software\Wow6432Node\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId 
+;   "Please provide a registry key (or other critical, unique file) that will exist after your product is installed and will not exist after your product is uninstalled"
+;   This is currently set as: HKLM\Software\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId
+;   But on 64 bit machines, this is actually set into:
+;   HKLM\Software\Wow6432Node\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId 
+;   PARTIALLY RESOLVED: Use the "HKLM\Software\Wow6432Node\..." key for detecting the successful install / uninstall
+;   TODO: Test on a 32 bit OS
 ;----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Building an installer
 ;----------------------
@@ -61,7 +64,7 @@
 ; Running the installer
 ;----------------------
 ; In normal verbose mode:   shopswell.exe
-; In silent mode:           shopswell.exe /SP /SILENT /VERYSILENT /NORESTART /SUPPRESSMSGBOXES    
+; In silent mode:           shopswell.exe /SP- /SILENT /VERYSILENT /NORESTART /SUPPRESSMSGBOXES    
 ;
 ; NOTE: This installer will create the key: 
 ; [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Shopswell\Shopswell App\Settings] Name:UniqueShopswellKey Value:911176E3-243D-49D5-9CF0-34B1FB01CBE3
@@ -89,7 +92,7 @@
 #define MyAppPublisher "Shopswell"
 #define MyAppURL "http://www.shopswell.com"
 #define MyAppId "911176E3-243D-49D5-9CF0-34B1FB01CBE3"
-#define MyExeName "nw.exe"
+#define MyExeName "swell.exe"
 #define LaunchProgram "Start Shopswell App after Installation"
 #define DesktopIcon "Add Desktop Shortcut"
 #define CreateDesktopIcon "Do you want to create a desktop icon?"
@@ -119,8 +122,13 @@ SetupIconFile="{#SwellSource}\icons\logo.ico"
 
 [Files]
 ; Gather files from the node-webkit, node_modules and the swell_desktop checkout directories
-Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}\{#MyAppName}"; Flags: ignoreversion uninsrestartdelete
+; Install base node webkit, sans the not-needed files
+Source: "{#NwjsSource}/*"; Excludes: "pdf.dll,ffmpegsumo.dll,libEGL.dll,libGLESv2.dll"; DestDir: "{app}\{#MyAppName}"; Flags: ignoreversion 
+; Install the nw.exe but copy it to swell.exe so that we can kill our task when uninstalling without affecting other running nw.exe apps
+Source: "{#NwjsSource}/nw.exe"; DestDir: "{app}\{#MyAppName}"; DestName: "{#MyExeName}"; Flags: ignoreversion 
+; Install the supporting node modules
 Source: "{#ModuleSource}/*"; DestDir: "{app}\{#MyAppName}\node_modules"; Flags: ignoreversion recursesubdirs  
+; Install the actual Shopswell app files
 Source: "{#SwellSource}/*"; Excludes: "app.nw,mac_files,README.md,.gitignore"; DestDir: "{app}\{#MyAppName}"; Flags: ignoreversion recursesubdirs 
 
 [Registry]
@@ -145,6 +153,10 @@ Name: "{userdesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppName}\{#MyExeName}";
 [Run]
 ; After installing, run the app
 Filename: "{app}\{#MyAppName}\{#MyExeName}"; WorkingDir: "{app}\{#MyAppName}"; Description: {#LaunchProgram}; Flags: postinstall shellexec
+
+[UninstallRun]  
+; Before uninstalling, kill the running app (otherwise uninstall will not be clean)  
+Filename: "{cmd}"; Parameters: "/C ""taskkill /im {#MyExeName} /f /t"  
   
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\{#MyAppName}"
