@@ -2,39 +2,8 @@
 ; John H - Oct 26 2015
 ;
 ; TODO: 
-; 0. DONE - Verify the naming of things (from the .exe to the App name, to the the folder names etc.) with the Playswell folks
-;
-; 1. Work on a more silent install ... can we get rid of the initial "Do you want this program to make changes" prompt?
-;    (/SP flag is supposed to do this but appear not to)
-;    FIXED below by lowering privelege level to 'lowest'
-;    TODO: Awaiting input from Shopswell re per-user install in Appdata vs. Program Files, HKCU vs. HKLU
-;    RESOLVED: HC installer will wrap this install, it takes on the "do you want this programm..." prompts
-;
-; 2. DONE - Testing non-admin user accounts
-;    Note: Non admin accounts will request a password when an install is attempted unless admin priveleges / per user install as per #1 above  
-;    There are some ways around this but wil result in a per-user install
-;    TODO: get guidance from Shopswell folks (same as #1)
-;    RESOLVED: HC installer runs in admin mode, wrap this install
-;
-; 3. DONE - Testing with Windows 10 - install works fine
-;    TODO - Uninstall may leave residue in registry - to be tracked down
-;    
-; 4. Testing scenarios where restart might be required
-;    DONE - so far, in testing various accounts (admin, user, guest) this has not happened 
-;
-; 5. Uninstall when the app is running needs to stop the running app first
-;    DONE - use 'killtask' on uninstall to kill the running instance of swell.exe
-;
-; 6. DONE - Try to "exclude" .gitignore & README.md from install 
-;
-; 7. Delve into the 32 v2 64 bit issues related to where HKLM keys are being stored is "Wow6432Node" OK?
-; 8. Test on 32 bit OS (related to #7) - the issue is the Hardcandy requirement to have an identifiable key which can be tested after install/uninstall:
-;   "Please provide a registry key (or other critical, unique file) that will exist after your product is installed and will not exist after your product is uninstalled"
-;   This is currently set as: HKLM\Software\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId
-;   But on 64 bit machines, this is actually set into:
-;   HKLM\Software\Wow6432Node\Shopswell\Shopswell App\Settings UniqueShopswellKey = ShopswellAppId 
-;   PARTIALLY RESOLVED: Use the "HKLM\Software\Wow6432Node\..." key for detecting the successful install / uninstall
-;   TODO: Test on a 32 bit OS
+; 1. Test on 32 bit OS
+; 2. Test on Windows 7 
 ;----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ; Building an installer
 ;----------------------
@@ -46,7 +15,7 @@
 ; 5. Checked out Github project: https://github.com/PlaySwell/swell_desktop
 ; 
 ; Generic script use 
-; From the command line: iscc NwjsSource ModuleSource SwellSource 
+; From the command line: iscc NwjsSource ModuleSource SwellSource setup.iss
 ; ...
 ; Where 
 ; - NwjsSource is the path to the directory (.\nwjs) which contains the original nw.exe from node-webkit (aka nw)
@@ -70,7 +39,6 @@
 ; [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Shopswell\Shopswell App\Settings] Name:UniqueShopswellKey Value:911176E3-243D-49D5-9CF0-34B1FB01CBE3
 ; on 64bit OSes
 ; The uninstall, if successful, removes this key
-;
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ; Default parameters, if not supplied on the command line

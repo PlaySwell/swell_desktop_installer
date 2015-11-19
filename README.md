@@ -8,7 +8,7 @@
 5. Check out Github project: (https://github.com/PlaySwell/swell_desktop)
 
 ##### Generic script usage
-`iscc NwjsSource ModuleSource SwellSource`
+`iscc NwjsSource ModuleSource SwellSource setup.iss`
 * `NwjsSource` is the path to the directory (`.\nwjs`) which contains the nw.exe from node-webkit (nw)
 * `ModuleSource` is the path to the directory (`.\node_modules`) which contains installed packages from 4. above
 * `SwellSource` is the path to the directory which contains the checked out `.\swell_desktop` repository
@@ -24,6 +24,6 @@
 ```
 
 ##### Running the installer
-In normal verbose mode:   `shopswell-setup-1.0.0.exe`
-In very silent mode:      `shopswell-setup-1.0.0.exe /SP /VERYSILENT`
+In normal verbose mode:   `shopswell.exe`
+In very silent mode:      `shopswell.exe /SP- /SILENT /VERYSILENT /NORESTART /SUPPRESSMSGBOXES`
       
